@@ -21,9 +21,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Install Gitleaks
         run: |
-          curl -Lo gitleaks https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64
+          GITLEAKS_LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r '.tag_name')
+          curl -sL https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_LATEST}/gitleaks_${GITLEAKS_LATEST#v}_linux_x64.tar.gz -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
 
@@ -45,4 +50,3 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
-
