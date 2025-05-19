@@ -23,14 +23,15 @@ jobs:
 
       - name: Install Gitleaks
         run: |
-          # Download the latest release tag
+          # Get latest version
           LATEST_TAG=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name)
-          # Build the URL
-          GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download/${LATEST_TAG}/gitleaks_${LATEST_TAG#v}_linux_amd64.tar.gz"
-          curl -Lo gitleaks.tar.gz "$GITLEAKS_URL"
-          tar -xzf gitleaks.tar.gz
+          # Build correct binary URL
+          GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download/${LATEST_TAG}/gitleaks_${LATEST_TAG#v}_linux_x64"
+          echo "Downloading Gitleaks from $GITLEAKS_URL"
+          curl -Lo gitleaks "$GITLEAKS_URL"
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
 
       - name: Run Gitleaks Scan using License Key
         env:
@@ -41,7 +42,7 @@ jobs:
             --config=.gitleaks.toml \
             --report-format=json \
             --report-path=gitleaks-report.json \
-            || true
+            || true  # Avoid failing the workflow on finding secrets
 
       - name: Upload Gitleaks Report
         if: always()
@@ -49,4 +50,3 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
-
