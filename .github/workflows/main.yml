@@ -29,7 +29,7 @@ jobs:
 
       - name: Run Gitleaks Scan with Org Key
         env:
-          GITLEAKS_ORG_KEY: ${{ secrets.GITLEAKSORGKEY }}
+          GITLEAKS_ORG_KEY: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3
         run: |
           gitleaks detect \
             --source=. \
