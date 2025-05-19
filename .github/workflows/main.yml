@@ -2,14 +2,14 @@ name: gitleaks
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   scan:
-    name: Gitleaks Scan with Org Key
+    name: Gitleaks Scan with License
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
@@ -21,28 +21,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Install Gitleaks
         run: |
-          GITLEAKS_LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r '.tag_name')
-          curl -sL https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_LATEST}/gitleaks_${GITLEAKS_LATEST#v}_linux_x64.tar.gz -o gitleaks.tar.gz
-          tar -xzf gitleaks.tar.gz gitleaks
+          GITLEAKS_LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep "browser_download_url" | grep "linux-amd64" | cut -d '"' -f 4)
+          curl -Lo gitleaks "$GITLEAKS_LATEST"
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
 
-      - name: Run Gitleaks Scan with Org Key
+      - name: Run Gitleaks Scan using License Key
         env:
-          GITLEAKS_ORG_KEY: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3
+          GITLEAKS_LICENSE: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3
         run: |
           gitleaks detect \
             --source=. \
             --config=.gitleaks.toml \
             --report-format=json \
             --report-path=gitleaks-report.json \
-            --org-key="$GITLEAKS_ORG_KEY" \
-            || true
+            || true  # Let the pipeline continue, can be removed to fail on findings
 
       - name: Upload Gitleaks Report
         if: always()
@@ -50,3 +45,5 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
+
+
