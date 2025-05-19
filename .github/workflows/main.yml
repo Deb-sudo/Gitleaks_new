@@ -2,9 +2,9 @@ name: gitleaks
 
 on:
   push:
-    branches: [main]  # Change 'main' to your desired branch
+    branches: [main]
   pull_request:
-    branches: [main]  # Ensures it also runs for PRs targeting this branch
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Gitleaks
         run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
+          curl -Lo gitleaks https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
 
@@ -37,7 +37,7 @@ jobs:
             --report-format=json \
             --report-path=gitleaks-report.json \
             --org-key="$GITLEAKS_ORG_KEY" \
-            || true  # Prevent job failure; handled manually below
+            || true
 
       - name: Upload Gitleaks Report
         if: always()
@@ -45,3 +45,4 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
+
