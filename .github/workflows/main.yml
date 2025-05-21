@@ -2,51 +2,22 @@ name: gitleaks
 
 on:
   push:
-    branches: ["**"]
+    branches:
+      - main  # Replace 'main' with your desired branch
   pull_request:
-    branches: ["**"]
-  workflow_dispatch:
+    branches:
+      - main  # This ensures PRs targeting 'main' will trigger the scan
 
 jobs:
   scan:
-    name: Gitleaks Scan with License
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-      contents: read
-
+    name: gitleaks
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Install Gitleaks
-        run: |
-          LATEST_TAG=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name)
-          FILE="gitleaks_${LATEST_TAG#v}_linux_x64.tar.gz"
-          URL="https://github.com/gitleaks/gitleaks/releases/download/${LATEST_TAG}/${FILE}"
-          echo "Downloading $URL"
-          curl -LO "$URL"
-          tar -xzf "$FILE"
-          chmod +x gitleaks
-          sudo mv gitleaks /usr/local/bin/gitleaks
-          gitleaks version
-
-      - name: Run Gitleaks Scan using License Key
+      - uses: gitleaks/gitleaks-action@v2
         env:
-          GITLEAKS_LICENSE: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3
-        run: |
-          gitleaks detect \
-            --source=. \
-            --config=.gitleaks.toml \
-            --report-format=json \
-            --report-path=gitleaks-report.json \
-            || true
+          GITLEAKS_LICENSE: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3 # Only required for Organizations
 
-      - name: Upload Gitleaks Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gitleaks-report
-          path: gitleaks-report.json
+
