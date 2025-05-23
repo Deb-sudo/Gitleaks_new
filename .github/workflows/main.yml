@@ -1,13 +1,12 @@
-# Only required for Organizations
 name: gitleaks
 
 on:
   push:
     branches:
-      - main  # Replace with your target branch
+      - main  # Change if your target branch is different
   pull_request:
     branches:
-      - main  # Replace with your target branch
+      - main
   workflow_dispatch:
 
 jobs:
@@ -15,12 +14,13 @@ jobs:
     name: gitleaks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run gitleaks (do not fail on detection)
+      - name: Run Gitleaks (don't fail if secrets are found)
         uses: gitleaks/gitleaks-action@v2
         env:
           GITLEAKS_LICENSE: FA5CF5-97CBD8-784F10-9EB227-B82C8B-V3
-          continue-on-error: true  # Do not fail the job if secrets are found
+        continue-on-error: true
